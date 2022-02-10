@@ -32,7 +32,7 @@ async def sendgetusageday(ctx, day):
                     "GET Tokens debited from silos: {getDebitedFromSilos}\n"
                     "GET Tokens credited to depot: {getCreditedToDepot}\n"
                     "Amount of tickets (NFT's) created: {mintCount}\n"
-                    "The average amount of GET minted per ticket: {averageGetPerMint}"
+                    "The average amount of GET spent per (minted) ticket: {averageGetPerMint}"
                     ).format(
             date=getusage['data']['date'],
             getDebitedFromSilos=getusage['data']['getDebitedFromSilos'],
