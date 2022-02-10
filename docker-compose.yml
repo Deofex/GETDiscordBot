@@ -4,4 +4,4 @@ services:
     GETDiscordBot:
         image: deofex/getdiscordbot:latest
         env_file:
-            - prod.env
+            - .env
