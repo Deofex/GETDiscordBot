@@ -8,10 +8,10 @@ graphurl = \
     "https://api.thegraph.com/subgraphs/name/getprotocol/get-protocol-subgraph"
 
 
-def queryGraph():
-    q = '''
+def queryGraph(days, skiplastday = False):
+    q = ('''
     {
-    protocolDays(orderBy: day, orderDirection: desc, first: 30) {
+    protocolDays(orderBy: day, orderDirection: desc, first: %s) {
         day
         mintCount
         getDebitedFromSilos
@@ -19,9 +19,11 @@ def queryGraph():
         averageGetPerMint
     }
     }
-    '''
+    ''' % days )
     r = requests.post(graphurl, json={'query': q})
     getusage = json.loads(r.text)
+    if skiplastday:
+        getusage['data']['protocolDays'] = getusage['data']['protocolDays'][1:]
     return getusage
 
 
@@ -90,9 +92,9 @@ def create_graphurl(data):
     return(qc.get_url())
 
 
-def getchartmonth():
+def getchart(days):
     try:
-        data = queryGraph()
+        data = queryGraph(days,skiplastday=True)
     except Exception as e:
         print('Error occured: {}'.format(e.args[0]))
         return {
@@ -117,4 +119,4 @@ def getchartmonth():
 
 
 if __name__ == '__main__':
-    print(getchartmonth())
+    print(getchart(30))
