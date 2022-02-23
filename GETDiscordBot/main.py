@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands
 from requests.api import get
 from thegraph.getusageday import getusageday
-from thegraph.getchartmonth import getchartmonth
+from thegraph.getchart import getchart
 from thegraph.getneedprediction import getneedprediction
 from saveimage.saveimage import saveimage
 
@@ -53,7 +53,7 @@ async def sendgetusageday(ctx, day):
     help='Gives a graph showing the GET Protocol usage in the last month'
 )
 async def sendmonthgraph(ctx):
-    getgraphurl = getchartmonth()
+    getgraphurl = getchart(31)
 
     if getgraphurl['status'] == 'OK':
         try:
@@ -67,6 +67,36 @@ async def sendmonthgraph(ctx):
     if getgraphurl['status'] == 'OK':
         chartembed = discord.Embed(
             title='GET usage last month',
+            description="Here's the requested graph:",
+        )
+        file = discord.File(filename, filename='chart.png')
+        chartembed.set_image(url="attachment://chart.png")
+        await ctx.send(file=file, embed=chartembed)
+    else:
+        response = (
+            "Error getting the GET Protocol graph. Reason: {}"
+        ).format(getgraphurl['reason'])
+        await ctx.send(response)
+
+@bot.command(
+    name='getquartergraph',
+    help='Gives a graph showing the GET Protocol usage in the last quarter'
+)
+async def sendmonthgraph(ctx):
+    getgraphurl = getchart(92)
+
+    if getgraphurl['status'] == 'OK':
+        try:
+            filename = 'temppic.png'
+            saveimage(getgraphurl['url'], filename)
+        except Exception as e:
+            print("Can't save picture. Reason: {}".format(e.args[0]))
+            getgraphurl['status'] = 'unabletosavepicture'
+            getgraphurl['reason'] = 'Unable to save picture'
+
+    if getgraphurl['status'] == 'OK':
+        chartembed = discord.Embed(
+            title='GET usage last quarter',
             description="Here's the requested graph:",
         )
         file = discord.File(filename, filename='chart.png')
