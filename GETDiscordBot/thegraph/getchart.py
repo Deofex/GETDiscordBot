@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 
 graphurl = \
-    "https://api.thegraph.com/subgraphs/name/getprotocol/get-protocol-subgraph"
+    "https://api.thegraph.com/subgraphs/name/getprotocol/get-protocol-subgraph-deprecated"
 
 
 def queryGraph(days, skiplastday = False):
