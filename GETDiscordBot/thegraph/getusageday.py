@@ -4,7 +4,7 @@ import re
 from datetime import datetime, timedelta
 
 graphurl = \
-    "https://api.thegraph.com/subgraphs/name/getprotocol/get-protocol-subgraph-deprecated"
+    "https://api.thegraph.com/subgraphs/name/getprotocol/get-protocol-subgraph"
 
 
 def queryGraph(day):
@@ -12,10 +12,10 @@ def queryGraph(day):
     {
         protocolDays(where:{day:%s}) {
             day
-            mintCount
-            getDebitedFromSilos
-            getCreditedToDepot
-            averageGetPerMint
+            soldCount
+            spentFuel
+            reservedFuel
+            averageReservedPerTicket
         }
     }
     ''' % day
@@ -88,11 +88,10 @@ def getusageday(day):
         'status': 'OK',
         'data': {
             'date': date,
-            'averageGetPerMint': data['averageGetPerMint'],
-            'getDebitedFromSilos':data['getDebitedFromSilos'],
-            'getCreditedToDepot': data['getCreditedToDepot'],
-            'mintCount': data['mintCount'],
-            'mintCount': data['mintCount']
+            'soldCount': data['soldCount'],
+            'spentFuel':data['spentFuel'],
+            'reservedFuel': data['reservedFuel'],
+            'averageReservedPerTicket': data['averageReservedPerTicket'],
         }
     }
 
