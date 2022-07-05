@@ -29,17 +29,16 @@ async def sendgetusageday(ctx, day):
 
     if getusage['status'] == 'OK':
         response = ("GET Protocol usage report for date: {date}:\n"
-                    "GET Tokens debited from silos: {getDebitedFromSilos}\n"
-                    "GET Tokens credited to depot: {getCreditedToDepot}\n"
-                    "Amount of tickets (NFT's) created: {mintCount}\n"
-                    "The average amount of GET spent per (minted) ticket: {averageGetPerMint}"
+                    "Amount of tickets (NFT's) created: {soldCount}\n"
+                    "GET fuel spent: {spentFuel}\n"
+                    "GET fuel reserved: {reservedFuel}\n"
+                    "The average amount of GET reservered per (minted) ticket: {averageReservedPerTicket}"
                     ).format(
-            date=getusage['data']['date'],
-            getDebitedFromSilos=getusage['data']['getDebitedFromSilos'],
-            getCreditedToDepot=getusage['data']['getCreditedToDepot'],
-            mintCount=getusage['data']['mintCount'],
-            averageGetPerMint=round(
-                float(getusage['data']['averageGetPerMint']), 2)
+                        date=getusage['data']['date'],
+                        soldCount=getusage['data']['soldCount'],
+                        spentFuel=round(float(getusage['data']['spentFuel']), 2),
+                        reservedFuel=round(float(getusage['data']['reservedFuel']), 2),
+                        averageReservedPerTicket= round(float(getusage['data']['averageReservedPerTicket']), 2)
         )
     else:
         response = (

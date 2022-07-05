@@ -3,14 +3,14 @@ import json
 
 
 graphurl = \
-    "https://api.thegraph.com/subgraphs/name/getprotocol/get-protocol-subgraph-deprecated"
+    "https://api.thegraph.com/subgraphs/name/getprotocol/get-protocol-subgraph"
 
 
 def queryGraph():
     q = '''
     {
     protocolDays(orderBy: day, orderDirection: desc, first: 100) {
-        getDebitedFromSilos
+        reservedFuel
     }
     }
     '''
@@ -25,10 +25,10 @@ def process_data(data):
     totaldays = 0
     totalgetdebitedfromsilos = 0
     for day in data['data']['protocolDays']:
-        if day['getDebitedFromSilos'] == "0":
+        if day['reservedFuel'] == "0":
             continue
         totaldays += 1
-        totalgetdebitedfromsilos += float(day['getDebitedFromSilos'])
+        totalgetdebitedfromsilos += float(day['reservedFuel'])
     return totaldays, totalgetdebitedfromsilos
 
 

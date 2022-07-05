@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 
 graphurl = \
-    "https://api.thegraph.com/subgraphs/name/getprotocol/get-protocol-subgraph-deprecated"
+    "https://api.thegraph.com/subgraphs/name/getprotocol/get-protocol-subgraph"
 
 
 def queryGraph(days, skiplastday = False):
@@ -13,10 +13,8 @@ def queryGraph(days, skiplastday = False):
     {
     protocolDays(orderBy: day, orderDirection: desc, first: %s) {
         day
-        mintCount
-        getDebitedFromSilos
-        getCreditedToDepot
-        averageGetPerMint
+        soldCount
+        reservedFuel
     }
     }
     ''' % days )
@@ -37,8 +35,8 @@ def create_graphurl(data):
     for day in days:
         lday = (epochdate + timedelta(days=day['day'])).strftime('%d-%m-%y')
         labels.append(lday)
-        values1.append(day['getDebitedFromSilos'])
-        values2.append(day['mintCount'])
+        values1.append(day['reservedFuel'])
+        values2.append(day['soldCount'])
     qc = QuickChart()
     qc.width = 500
     qc.height = 300
@@ -48,12 +46,12 @@ def create_graphurl(data):
         "data": {
             "labels": labels,
             "datasets": [{
-                "label": "GET debited from silos",
+                "label": "GET reserved",
                 "data": values1,
                 "yAxisID": "y-axis-1",
             },
                 {
-                "label": "Tickets sold",
+                "label": "NFT Tickets sold",
                 "data": values2,
                 "yAxisID": "y-axis-2",
                 "type": "bar"
@@ -65,7 +63,7 @@ def create_graphurl(data):
                     "id": "y-axis-1",
                     "scaleLabel": {
                         "display": True,
-                        "labelString": "GET debited"
+                        "labelString": "GET reserved"
                     },
                     "type": "linear",
                     "display": True,
@@ -75,7 +73,7 @@ def create_graphurl(data):
                     "id": "y-axis-2",
                     "scaleLabel": {
                         "display": True,
-                        "labelString": "Tickets sold"
+                        "labelString": "NFT Tickets created"
                     },
                     "type": "linear",
                     "display": True,
