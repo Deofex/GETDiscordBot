@@ -34,6 +34,8 @@ def getdatenumber(day):
         date = datetime.now()
     elif day.lower() == 'yesterday':
         date = datetime.now() - timedelta(days=1)
+    elif day == "":
+        raise Exception('InvalidDay')
     else:
         dateregex = '^[0-3][0-9]-[0-1][0-9]-[0-9][0-9][0-9][0-9]$'
         if re.match(dateregex, day):

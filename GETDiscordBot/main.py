@@ -26,7 +26,7 @@ async def on_ready():
     name='getusageday',
     help='Gives a usage report for the GET Protocol for a certain day'
 )
-async def sendgetusageday(ctx, day = 'today'):
+async def sendgetusageday(ctx, day=""):
     getusage = getusageday(day)
 
     if getusage['status'] == 'OK':
@@ -43,13 +43,18 @@ async def sendgetusageday(ctx, day = 'today'):
                     f"Average fuel reservered per (minted) ticket: "
                     f"**{average_reserved_per_ticket} GET**"
                     )
+        embed = discord.Embed(
+            title=f"GET Protocol Usage Report for {getusage['data']['date']}",
+            description=response,
+            color=0x01C696)
     else:
         response = \
             f"Error getting the GET Protocol usage for this day. Reason: {getusage['reason']}"
-    embed = discord.Embed(
-        title=f"GET Protocol Usage Report for {getusage['data']['date']}",
-        description=response,
-        color=0x01C696)
+        embed = discord.Embed(
+            title="GET Protocol Usage Report can't be generated",
+            description= response,
+            color=0x01C696)
+
     await ctx.send(embed=embed)
 
 
