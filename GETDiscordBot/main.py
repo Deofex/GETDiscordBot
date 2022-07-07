@@ -40,7 +40,7 @@ async def sendgetusageday(ctx, day=""):
                     f"Fuel reserved: **{reserved_fuel} GET**\n"
                     f"Fuel spent: **{spent_fuel} GET**\n"
                     f"Total sales volume: **${total_sales_volume:,.2f}**\n"
-                    f"Average fuel reservered per (minted) ticket: "
+                    f"Average fuel reserved per (minted) ticket: "
                     f"**{average_reserved_per_ticket} GET**"
                     )
         embed = discord.Embed(
