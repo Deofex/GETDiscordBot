@@ -1,0 +1,8 @@
+{
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true,
+    "http.proxySupport": "off",
+    "editor.rulers": [
+    100
+    ]
+}

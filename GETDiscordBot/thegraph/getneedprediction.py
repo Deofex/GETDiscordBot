@@ -1,13 +1,13 @@
-import requests
 import json
+import requests
 
 
-graphurl = \
+GRAPHURL = \
     "https://api.thegraph.com/subgraphs/name/getprotocol/get-protocol-subgraph"
 
 
-def queryGraph():
-    q = '''
+def query_graph():
+    query = '''
     {
     protocolDays(orderBy: day, orderDirection: desc, first: 100) {
         reservedFuel
@@ -15,16 +15,16 @@ def queryGraph():
     }
     '''
 
-    r = requests.post(graphurl, json={'query': q})
+    req = requests.post(GRAPHURL, json={'query': query})
 
-    getusage = json.loads(r.text)
+    getusage = json.loads(req.text)
     return getusage
 
 
-def process_data(data):
+def process_data(graphdata):
     totaldays = 0
     totalgetdebitedfromsilos = 0
-    for day in data['data']['protocolDays']:
+    for day in graphdata['data']['protocolDays']:
         if day['reservedFuel'] == "0":
             continue
         totaldays += 1
@@ -34,18 +34,18 @@ def process_data(data):
 
 def getneedprediction():
     try:
-        data = queryGraph()
-    except Exception as e:
+        graphdata = query_graph()
+    except Exception as ex:
         return {
             'status': 'UnknownError',
-            'reason': e.args[0]
+            'reason': ex.args[0]
         }
 
-    totaldays, totalgetdebitedfromsilos = process_data(data)
+    totaldays, totalgetdebitedfromsilos = process_data(graphdata)
     avgdebitperday = totalgetdebitedfromsilos / totaldays
     getneedperyear = int(365 * avgdebitperday)
     getneedpermonth = int(365 * avgdebitperday / 12)
-    data = {
+    resultdata = {
         "getneedperday":int(avgdebitperday),
         "getneedperyear":getneedperyear,
         "getneedpermonth":getneedpermonth
@@ -53,14 +53,13 @@ def getneedprediction():
     }
     return {
         'status': 'OK',
-        'data': data
+        'data': resultdata
     }
 
 
 if __name__ == "__main__":
     data = getneedprediction()
-    print("Needed per year: {} GET tokens. "
-    "Needed per month: {} GET tokens.".format(
-        data['data']['getneedperyear'],
-        data['data']['getneedpermonth']
-        ))
+    print(
+        f"Needed per year: {data['data']['getneedperyear']} GET tokens. "
+        f"Needed per month: {data['data']['getneedpermonth']} GET tokens."
+        )

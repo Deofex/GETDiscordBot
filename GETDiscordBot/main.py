@@ -2,9 +2,7 @@ import asyncio
 import os
 import discord
 import schedule
-import time
 from discord.ext import commands
-from requests.api import get
 from thegraph.getusageday import getusageday
 from thegraph.getchart import getchart
 from thegraph.getneedprediction import getneedprediction
@@ -20,8 +18,8 @@ bot = commands.Bot(command_prefix='!')
 @bot.event
 async def on_ready():
     for guild in bot.guilds:
-        print("{} is connected to the following guild:".format(bot.user))
-        print("{} - {}".format(guild.name, guild.id))
+        print(f"{bot.user} is connected to the following guild:")
+        print(f"{guild.name} - {guild.id}")
 
 
 @bot.command(
@@ -32,24 +30,26 @@ async def sendgetusageday(ctx, day = 'today'):
     getusage = getusageday(day)
 
     if getusage['status'] == 'OK':
-        response = ("NFT tickets created: **{soldCount}**\n"
-                    "Fuel reserved: **{reservedFuel} GET**\n"
-                    "Fuel spent: **{spentFuel} GET**\n"
-                    "Total sales volume: **${totalSalesVolume:,.2f}**\n"
-                    "Average fuel reservered per (minted) ticket: **{averageReservedPerTicket} GET**"
-                    ).format(
-                        date=getusage['data']['date'],
-                        soldCount=getusage['data']['soldCount'],
-                        spentFuel=round(float(getusage['data']['spentFuel']), 2),
-                        reservedFuel=round(float(getusage['data']['reservedFuel']), 2),
-                        averageReservedPerTicket= round(float(getusage['data']['averageReservedPerTicket']), 2),
-                        totalSalesVolume= float(getusage['data']['totalSalesVolume']),
-        )
+        sold_count=getusage['data']['soldCount']
+        spent_fuel=round(float(getusage['data']['spentFuel']), 2)
+        reserved_fuel=round(float(getusage['data']['reservedFuel']), 2)
+        average_reserved_per_ticket= round(
+            float(getusage['data']['averageReservedPerTicket']), 2)
+        total_sales_volume= float(getusage['data']['totalSalesVolume'])
+        response = (f"NFT tickets created: **{sold_count}**\n"
+                    f"Fuel reserved: **{reserved_fuel} GET**\n"
+                    f"Fuel spent: **{spent_fuel} GET**\n"
+                    f"Total sales volume: **${total_sales_volume:,.2f}**\n"
+                    f"Average fuel reservered per (minted) ticket: "
+                    f"**{average_reserved_per_ticket} GET**"
+                    )
     else:
-        response = (
-            "Error getting the GET Protocol usage for this day. Reason: {}"
-        ).format(getusage['reason'])
-    embed = discord.Embed(title="GET Protocol Usage Report for {}".format(getusage['data']['date']), description=response, color=0x01C696)
+        response = \
+            f"Error getting the GET Protocol usage for this day. Reason: {getusage['reason']}"
+    embed = discord.Embed(
+        title=f"GET Protocol Usage Report for {getusage['data']['date']}",
+        description=response,
+        color=0x01C696)
     await ctx.send(embed=embed)
 
 
@@ -64,8 +64,8 @@ async def sendmonthgraph(ctx):
         try:
             filename = 'temppic.png'
             saveimage(getgraphurl['url'], filename)
-        except Exception as e:
-            print("Can't save picture. Reason: {}".format(e.args[0]))
+        except Exception as ex:
+            print(f"Can't save picture. Reason: {ex.args[0]}")
             getgraphurl['status'] = 'unabletosavepicture'
             getgraphurl['reason'] = 'Unable to save picture'
 
@@ -79,24 +79,22 @@ async def sendmonthgraph(ctx):
         chartembed.set_image(url="attachment://chart.png")
         await ctx.send(file=file, embed=chartembed)
     else:
-        response = (
-            "Error getting the GET Protocol graph. Reason: {}"
-        ).format(getgraphurl['reason'])
+        response = f"Error getting the GET Protocol graph. Reason: {getgraphurl['reason']}"
         await ctx.send(response)
 
 @bot.command(
     name='getquartergraph',
     help='Gives a graph showing the GET Protocol usage in the last quarter'
 )
-async def sendmonthgraph(ctx):
+async def sendquartergraph(ctx):
     getgraphurl = getchart(92)
 
     if getgraphurl['status'] == 'OK':
         try:
             filename = 'temppic.png'
             saveimage(getgraphurl['url'], filename)
-        except Exception as e:
-            print("Can't save picture. Reason: {}".format(e.args[0]))
+        except Exception as ex:
+            print(f"Can't save picture. Reason: {ex.args[0]}")
             getgraphurl['status'] = 'unabletosavepicture'
             getgraphurl['reason'] = 'Unable to save picture'
 
@@ -110,9 +108,7 @@ async def sendmonthgraph(ctx):
         chartembed.set_image(url="attachment://chart.png")
         await ctx.send(file=file, embed=chartembed)
     else:
-        response = (
-            "Error getting the GET Protocol graph. Reason: {}"
-        ).format(getgraphurl['reason'])
+        response = f"Error getting the GET Protocol graph. Reason: {getgraphurl['reason']}"
         await ctx.send(response)
 
 
@@ -124,36 +120,43 @@ async def sendtokenspredeiction(ctx):
     getneeded = getneedprediction()
     if getneeded['status'] == 'OK':
         response = ("Based on the data of the last 100 days, the protocol needs an average of:\n\n"
-                    "**{} GET** fuel per-day\n"
-                    "**{} GET** fuel per-month\n"
-                    "**{} GET** fuel per-year\n\n"
-                    "*Note: the amount of fuel needed is subject to change dependent on price changes of GET, the point at which integrators top up, and amount of tickets sold. Check [the docs](https://docs.get-protocol.io/docs/token-economics-interactions) for more information on how this is caculated.*"
-                    ).format(
-            getneeded['data']['getneedperday'],
-            getneeded['data']['getneedpermonth'],
-            getneeded['data']['getneedperyear']
-        )
+                    f"**{getneeded['data']['getneedperday']} GET** fuel per-day\n"
+                    f"**{ getneeded['data']['getneedpermonth']} GET** fuel per-month\n"
+                    f"**{getneeded['data']['getneedperyear']} GET** fuel per-year\n\n"
+                    "*Note: the amount of fuel needed is subject to change dependent on price "
+                    "changes of GET, the point at which integrators top up, and amount of tickets "
+                    "sold. Check "
+                    "[the docs](https://docs.get-protocol.io/docs/token-economics-interactions) "
+                    "for more information on how this is caculated.*"
+                    )
     else:
-        response = (
-            "Error getting the GET Protocol graph. Reason: {}"
-        ).format(getneeded['reason'])
+        response =  f"Error getting the GET Protocol graph. Reason: {getneeded['reason']}"
 
-    embed = discord.Embed(title="GET Protocol Usage Prediction", description=response, color=0x01C696)
+    embed = discord.Embed(
+        title="GET Protocol Usage Prediction",
+        description=response,
+        color=0x01C696
+        )
     await ctx.send(embed=embed)
 
 async def daily_report():
     getusage = getusageday('yesterday')
+    total_sales_volume =  float(getusage['data']['totalSalesVolume'])
+    reserved_fuel = float(getusage['data']['reservedFuel'])
     description = (
-        '**{} NFT tickets** sold and **{} events** created on the protocol in the last 24 hours, with a total sales volume of **${:,.2f}**.\n\n'
-        'A total of **{:.2f} GET** was used as fuel.\n\n'
-        '*See [usage charts](https://dashboard.get-community.com/charts). Learn more about [GET](https://www.get-protocol.io/token) and its usage as [fuel](https://docs.get-protocol.io/docs/token-economics-fuel).*'
-    ).format(
-        getusage['data']['soldCount'],
-        getusage['data']['eventCount'],
-        float(getusage['data']['totalSalesVolume']),
-        float(getusage['data']['reservedFuel']),
+        f"**{getusage['data']['soldCount']} NFT tickets** sold and "
+        f"**{getusage['data']['eventCount']} events** created on the protocol in the last 24 hours,"
+        f" with a total sales volume of **${total_sales_volume:,.2f}**.\n\n"
+        f"A total of **{reserved_fuel:.2f} GET** was used as fuel.\n\n"
+        "*See [usage charts](https://dashboard.get-community.com/charts). Learn more about "
+        "[GET](https://www.get-protocol.io/token) and its usage as "
+        "[fuel](https://docs.get-protocol.io/docs/token-economics-fuel).*"
     )
-    embed = discord.Embed(title="GET Protocol Daily Report", description=description, color=0x01C696)
+    embed = discord.Embed(
+        title="GET Protocol Daily Report",
+        description=description,
+        color=0x01C696
+        )
     await bot.wait_until_ready()
     channel = bot.get_channel(id=report_channel_id)
     await channel.send(embed=embed)
@@ -163,9 +166,11 @@ schedule.every().day.at("09:00").do(lambda: asyncio.create_task(daily_report()))
 
 async def status_update():
     getusage = getusageday('today')
-    status = ('{:.2f} GET used today').format(float(getusage['data']['reservedFuel']))
+    reserved_fuel = float(getusage['data']['reservedFuel'])
+    status = f"{reserved_fuel:.2f} GET used today"
     await bot.wait_until_ready()
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=status))
+    await bot.change_presence(
+        activity=discord.Activity(type=discord.ActivityType.watching, name=status))
 
 schedule.every(5).minutes.do(lambda: asyncio.create_task(status_update()))
 
