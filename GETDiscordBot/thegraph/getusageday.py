@@ -8,19 +8,19 @@ GRAPH_URL = \
 
 
 def query_graph(day):
-    query = '''
-    {
-        protocolDays(where:{day:%s}) {
-            day
-            eventCount
-            soldCount
-            spentFuel
-            reservedFuel
-            averageReservedPerTicket
-            totalSalesVolume
-        }
-    }
-    ''' % day
+    query = (
+    "{"
+    f"    protocolDays(where:{{day:{day}}}) {{"
+    "        day"
+    "        eventCount"
+    "        soldCount"
+    "        spentFuel"
+    "        reservedFuel"
+    "        averageReservedPerTicket"
+    "        totalSalesVolume"
+    "    }"
+    "}"
+    )
 
     request = requests.post(GRAPH_URL, json={'query': query})
 
@@ -61,17 +61,16 @@ def getusageday(day):
                 'reason': ("The day is specified in an unknow format. Use "
                            "'Today', 'Yesterday' or 'dd-mm-yyyy'.")
             }
-        elif ex.args[0] == 'FutureDate':
+        if ex.args[0] == 'FutureDate':
             return {
                 'status': 'FutureDate',
                 'reason': ("My crystal ball is damaged, future predictions "
                 "are temporary disabled.")
             }
-        else:
-            return {
-                'status': 'UnknownError',
-                'reason': ex.args[0]
-            }
+        return {
+            'status': 'UnknownError',
+            'reason': ex.args[0]
+        }
     # If datenumber is below the release of mainnet, return DateToOld
     if datenumber < 18926:
         return {

@@ -9,15 +9,15 @@ GRAPH_URL = \
 
 
 def query_graph(days, skiplastday = False):
-    query = ('''
-    {
-    protocolDays(orderBy: day, orderDirection: desc, first: %s) {
-        day
-        soldCount
-        reservedFuel
-    }
-    }
-    ''' % days )
+    query = (
+    "{"
+    f"   protocolDays(orderBy: day, orderDirection: desc, first: {days}) {{"
+    "       day"
+    "       soldCount"
+    "       reservedFuel"
+    "   }"
+    "}"
+    )
     request = requests.post(GRAPH_URL, json={'query': query})
     getusage = json.loads(request.text)
     if skiplastday:
