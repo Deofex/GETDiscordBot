@@ -1,25 +1,25 @@
-import requests
 import json
-from quickchart import QuickChart
 from datetime import datetime, timedelta
+import requests
+from quickchart import QuickChart
 
 
-graphurl = \
+GRAPH_URL = \
     "https://api.thegraph.com/subgraphs/name/getprotocol/get-protocol-subgraph"
 
 
-def queryGraph(days, skiplastday = False):
-    q = ('''
-    {
-    protocolDays(orderBy: day, orderDirection: desc, first: %s) {
-        day
-        soldCount
-        reservedFuel
-    }
-    }
-    ''' % days )
-    r = requests.post(graphurl, json={'query': q})
-    getusage = json.loads(r.text)
+def query_graph(days, skiplastday = False):
+    query = (
+    "{"
+    f"   protocolDays(orderBy: day, orderDirection: desc, first: {days}) {{"
+    "       day"
+    "       soldCount"
+    "       reservedFuel"
+    "   }"
+    "}"
+    )
+    request = requests.post(GRAPH_URL, json={'query': query})
+    getusage = json.loads(request.text)
     if skiplastday:
         getusage['data']['protocolDays'] = getusage['data']['protocolDays'][1:]
     return getusage
@@ -37,11 +37,11 @@ def create_graphurl(data):
         labels.append(lday)
         values1.append(day['reservedFuel'])
         values2.append(day['soldCount'])
-    qc = QuickChart()
-    qc.width = 500
-    qc.height = 300
-    qc.device_pixel_ratio = 2.0
-    qc.config = {
+    quick_chart = QuickChart()
+    quick_chart.width = 500
+    quick_chart.height = 300
+    quick_chart.device_pixel_ratio = 2.0
+    quick_chart.config = {
         "type": "line",
         "data": {
             "labels": labels,
@@ -87,23 +87,23 @@ def create_graphurl(data):
     }
 
     # Print the chart URL
-    return(qc.get_url())
+    return quick_chart.get_url()
 
 
 def getchart(days):
     try:
-        data = queryGraph(days,skiplastday=True)
-    except Exception as e:
-        print('Error occured: {}'.format(e.args[0]))
+        data = query_graph(days,skiplastday=True)
+    except Exception as ex:
+        print(f"Error occured: {ex.args[0]}")
         return {
             'status': 'UnknownError',
             'reason': 'Unknown Error'
         }
 
     try:
-        graphurl = create_graphurl(data)
-    except Exception as e:
-        print('Error occured: {}'.format(e.args[0]))
+        fullgraphurl = create_graphurl(data)
+    except Exception as ex:
+        print(f"Error occured: {ex.args[0]}")
         return {
             'status': 'UnknownError',
             'reason': 'Unknown Error'
@@ -111,7 +111,7 @@ def getchart(days):
 
     return {
             'status': 'OK',
-            'url': graphurl
+            'url': fullgraphurl
         }
 
 

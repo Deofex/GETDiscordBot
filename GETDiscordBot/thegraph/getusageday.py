@@ -1,29 +1,31 @@
-import requests
 import json
 import re
 from datetime import datetime, timedelta
+import requests
 
-graphurl = \
+GRAPH_URL = \
     "https://api.thegraph.com/subgraphs/name/getprotocol/get-protocol-subgraph"
 
 
-def queryGraph(day):
-    q = '''
-    {
-        protocolDays(where:{day:%s}) {
-            day
-            soldCount
-            spentFuel
-            reservedFuel
-            averageReservedPerTicket
-        }
-    }
-    ''' % day
+def query_graph(day):
+    query = (
+    "{"
+    f"    protocolDays(where:{{day:{day}}}) {{"
+    "        day"
+    "        eventCount"
+    "        soldCount"
+    "        spentFuel"
+    "        reservedFuel"
+    "        averageReservedPerTicket"
+    "        totalSalesVolume"
+    "    }"
+    "}"
+    )
 
-    r = requests.post(graphurl, json={'query': q})
+    request = requests.post(GRAPH_URL, json={'query': query})
 
-    getusage = json.loads(r.text)
-    return getusage
+    get_usage= json.loads(request.text)
+    return get_usage
 
 
 def getdatenumber(day):
@@ -32,11 +34,13 @@ def getdatenumber(day):
         date = datetime.now()
     elif day.lower() == 'yesterday':
         date = datetime.now() - timedelta(days=1)
+    elif day == "":
+        raise Exception('InvalidDay')
     else:
         dateregex = '^[0-3][0-9]-[0-1][0-9]-[0-9][0-9][0-9][0-9]$'
         if re.match(dateregex, day):
-            d = day.split('-')
-            date = datetime(int(d[2]), int(d[1]), int(d[0]))
+            d_splitted = day.split('-')
+            date = datetime(int(d_splitted[2]), int(d_splitted[1]), int(d_splitted[0]))
         else:
             raise Exception('InvalidDay')
     if date > datetime.now():
@@ -50,24 +54,23 @@ def getusageday(day):
     # Convert given date to datenumber
     try:
         date, datenumber = getdatenumber(day)
-    except Exception as e:
-        if (e.args[0] == 'InvalidDay'):
+    except Exception as ex:
+        if ex.args[0] == 'InvalidDay':
             return {
                 'status': 'InvalidDay',
                 'reason': ("The day is specified in an unknow format. Use "
                            "'Today', 'Yesterday' or 'dd-mm-yyyy'.")
             }
-        elif (e.args[0] == 'FutureDate'):
+        if ex.args[0] == 'FutureDate':
             return {
                 'status': 'FutureDate',
                 'reason': ("My crystal ball is damaged, future predictions "
                 "are temporary disabled.")
             }
-        else:
-            return {
-                'status': 'UnknownError',
-                'reason': e.args[0]
-            }
+        return {
+            'status': 'UnknownError',
+            'reason': ex.args[0]
+        }
     # If datenumber is below the release of mainnet, return DateToOld
     if datenumber < 18926:
         return {
@@ -77,9 +80,9 @@ def getusageday(day):
         }
     # Query the data
     try:
-        data = (queryGraph(datenumber))['data']['protocolDays'][0]
-    except Exception as e:
-        print('Error occured: {}'.format(e.args[0]))
+        data = (query_graph(datenumber))['data']['protocolDays'][0]
+    except Exception as ex:
+        print(f"Error occured: {ex.args[0]}")
         return {
             'status': 'UnknownError',
             'reason': 'Unknown Error'
@@ -88,10 +91,12 @@ def getusageday(day):
         'status': 'OK',
         'data': {
             'date': date,
+            'eventCount': data['eventCount'],
             'soldCount': data['soldCount'],
             'spentFuel':data['spentFuel'],
             'reservedFuel': data['reservedFuel'],
             'averageReservedPerTicket': data['averageReservedPerTicket'],
+            'totalSalesVolume': data['totalSalesVolume'],
         }
     }
 
@@ -102,6 +107,4 @@ if __name__ == '__main__':
         print(getusage)
     else:
         print('Status not okay')
-        print('Reason: {}'.format(getusage['reason']))
-
-
+        print(f"Reason: {getusage['reason']}")
