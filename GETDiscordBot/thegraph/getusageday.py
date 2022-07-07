@@ -12,10 +12,12 @@ def queryGraph(day):
     {
         protocolDays(where:{day:%s}) {
             day
+            eventCount
             soldCount
             spentFuel
             reservedFuel
             averageReservedPerTicket
+            totalSalesVolume
         }
     }
     ''' % day
@@ -88,10 +90,12 @@ def getusageday(day):
         'status': 'OK',
         'data': {
             'date': date,
+            'eventCount': data['eventCount'],
             'soldCount': data['soldCount'],
             'spentFuel':data['spentFuel'],
             'reservedFuel': data['reservedFuel'],
             'averageReservedPerTicket': data['averageReservedPerTicket'],
+            'totalSalesVolume': data['totalSalesVolume'],
         }
     }
 
